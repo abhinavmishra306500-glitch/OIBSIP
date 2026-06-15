@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Abhinav Dashboard System</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(-45deg,#0f172a,#1e1b4b,#9333ea,#06b6d4);
+    background-size:400% 400%;
+    animation:bg 10s ease infinite;
+    color:white;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+@keyframes bg{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+.box{
+    width:400px;
+    padding:20px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(12px);
+    border-radius:15px;
+    text-align:center;
+}
+
+input, select{
+    width:90%;
+    padding:10px;
+    margin:6px 0;
+    border:none;
+    border-radius:8px;
+    outline:none;
+}
+
+button{
+    width:95%;
+    padding:10px;
+    margin-top:8px;
+    border:none;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.register{background:#22c55e;color:white;}
+.login{background:#3b82f6;color:white;}
+.logout{background:#ef4444;color:white;}
+
+.dashboard{
+    width:90%;
+    max-width:900px;
+    padding:20px;
+    background:rgba(255,255,255,0.08);
+    border-radius:15px;
+    backdrop-filter:blur(15px);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+th, td{
+    padding:10px;
+    border-bottom:1px solid rgba(255,255,255,0.2);
+    text-align:center;
+}
+
+th{
+    background:rgba(0,0,0,0.3);
+    color:#facc15;
+}
+
+.hidden{display:none;}
+
+h2{color:#facc15;}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN / REGISTER -->
+<div class="box" id="authBox">
+
+<h2>Abhinav Login System 🔐</h2>
+
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+
+<!-- AGE ADDED -->
+<input id="age" type="number" placeholder="Age">
+
+<select id="gender">
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
+    <option value="Other">Other</option>
+</select>
+
+<button class="register" onclick="register()">Register</button>
+<button class="login" onclick="login()">Login</button>
+
+<p id="msg"></p>
+
+</div>
+
+<!-- USER DASHBOARD -->
+<div class="box hidden" id="userDash">
+    <h2>Welcome User 👤</h2>
+    <p id="welcome"></p>
+    <button class="logout" onclick="logout()">Logout</button>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="dashboard hidden" id="adminDash">
+
+<h2>🧑‍💼 Admin Dashboard (Abhinav Only)</h2>
+
+<p>All registered users in system:</p>
+
+<table>
+    <tr>
+        <th>Username</th>
+        <th>Password</th>
+        <th>Age</th>
+        <th>Gender</th>
+        <th>Created Time</th>
+    </tr>
+    <tbody id="tableData"></tbody>
+</table>
+
+<br>
+<button class="logout" onclick="logout()">Logout</button>
+
+</div>
+
+<script>
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+
+// REGISTER
+function register(){
+
+    let u = document.getElementById("user").value;
+    let p = document.getElementById("pass").value;
+    let a = document.getElementById("age").value;
+    let g = document.getElementById("gender").value;
+
+    if(!u || !p || !a){
+        document.getElementById("msg").innerText = "Fill all fields!";
+        return;
+    }
+
+    users.push({
+        username:u,
+        password:p,
+        age:a,
+        gender:g,
+        time:new Date().toLocaleString()
+    });
+
+    localStorage.setItem("users", JSON.stringify(users));
+
+    document.getElementById("msg").innerText = "Registered successfully!";
+}
+
+// LOGIN
+function login(){
+
+    let u = document.getElementById("user").value;
+    let p = document.getElementById("pass").value;
+
+    let found = users.find(x => x.username === u && x.password === p);
+
+    if(found){
+
+        document.getElementById("authBox").classList.add("hidden");
+
+        // ADMIN CHECK
+        if(u.toLowerCase() === "abhinav"){
+
+            document.getElementById("adminDash").classList.remove("hidden");
+            loadTable();
+
+        } else {
+            document.getElementById("userDash").classList.remove("hidden");
+            document.getElementById("welcome").innerText =
+            `Hello ${u} 👋 | Age: ${found.age}`;
+        }
+
+    } else {
+        document.getElementById("msg").innerText = "Invalid login!";
+    }
+}
+
+// LOAD TABLE
+function loadTable(){
+
+    let table = document.getElementById("tableData");
+    table.innerHTML = "";
+
+    users.forEach(u=>{
+
+        table.innerHTML += `
+        <tr>
+            <td>${u.username}</td>
+            <td>${"*".repeat(u.password.length)}</td>
+            <td>${u.age}</td>
+            <td>${u.gender}</td>
+            <td>${u.time}</td>
+        </tr>
+        `;
+    });
+}
+
+// LOGOUT
+function logout(){
+    location.reload();
+}
+
+</script>
+
+</body>
+</html>
